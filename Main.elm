@@ -7,6 +7,32 @@ import Http
 import Json.Decode as Decode
 
 
+main =
+    Html.program
+        { init = init "cats"
+        , view = view
+        , update = update
+        , subscriptions = always Sub.none
+        }
+
+
+getRandomGif : String -> Cmd Msg
+getRandomGif topic =
+    let
+        url =
+            "https://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=" ++ topic
+
+        request =
+            Http.get url decodeGifUrl
+    in
+        Http.send NewGif request
+
+
+decodeGifUrl : Decode.Decoder String
+decodeGifUrl =
+    Decode.at [ "data", "image_url" ] Decode.string
+
+
 type alias Model =
     { topic : String
     , gifUrl : String
@@ -47,31 +73,5 @@ view model =
     div []
         [ h2 [] [ text model.topic ]
         , div [] [ img [ src model.gifUrl ] [] ]
-        , button [ onClick RequestMore ] [ text "More, better .." ]
+        , button [ onClick RequestMore ] [ text "More, better..." ]
         ]
-
-
-main =
-    Html.program
-        { init = init "cats"
-        , view = view
-        , update = update
-        , subscriptions = always Sub.none
-        }
-
-
-getRandomGif : String -> Cmd Msg
-getRandomGif topic =
-    let
-        url =
-            "https://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=" ++ topic
-
-        request =
-            Http.get url decodeGifUrl
-    in
-        Http.send NewGif request
-
-
-decodeGifUrl : Decode.Decoder String
-decodeGifUrl =
-    Decode.at [ "data", "image_url" ] Decode.string
